@@ -4,14 +4,15 @@
 *.tfstate.*
 .terraform.lock.hcl
 
-# Terraform plans
-*.tfplan
-
-# Environment
-.env
+# Python
+__pycache__/
+*.pyc
 
 # macOS
 .DS_Store
 
 # VS Code
 .vscode/
+
+# Environment
+.env
