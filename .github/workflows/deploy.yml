@@ -64,3 +64,10 @@ jobs:
         run: |
           docker push \
           407772390762.dkr.ecr.us-east-1.amazonaws.com/automation-lab:latest
+
+                - name: Force ECS Deployment
+                  run: |
+                    aws ecs update-service \
+                      --cluster automation-lab-cluster \
+                      --service automation-lab-service \
+                      --force-new-deployment
