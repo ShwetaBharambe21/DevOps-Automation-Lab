@@ -1,4 +1,4 @@
-name: Deploy Flask App to Amazon ECS
+name: CI/CD Pipeline
 
 on:
   push:
@@ -10,62 +10,25 @@ env:
   ECR_REPOSITORY: automation-lab
   ECS_CLUSTER: automation-lab-cluster
   ECS_SERVICE: automation-lab-service
-  CONTAINER_NAME: automation-lab
 
 jobs:
-  deploy:
-    name: Build and Deploy
+  test:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          python-version: "3.12"
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build Docker Image
-        working-directory: ./app
+      - name: Install Dependencies
         run: |
-          docker build \
-            --platform linux/amd64 \
-            -t $ECR_REPOSITORY:latest .
+          pip install -r app/requirements.txt
+          pip install pytest
 
-      - name: Tag Docker Image
+      - name: Run Tests
         run: |
-          docker tag \
-          $ECR_REPOSITORY:latest \
-          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
-
-      - name: Push Docker Image
-        run: |
-          docker push \
-          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
-
-      - name: Force ECS Deployment
-        run: |
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_SERVICE \
-            --force-new-deployment
-
-      - name: Wait for Deployment to Finish
-        run: |
-          aws ecs wait services-stable \
-            --cluster $ECS_CLUSTER \
-            --services $ECS_SERVICE
-
-      - name: Deployment Successful
-        run: |
-          echo "Deployment completed successfully!"
+          python -m pytest
