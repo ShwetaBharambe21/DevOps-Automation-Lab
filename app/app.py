@@ -6,7 +6,7 @@ app = Flask(__name__)
 def home():
     return """
     <h1>🚀 DevOps Automation Lab</h1>
-    <h3>Version 2</h3>
+    <h3>Version 3</h3>
     <p>Successfully running inside Docker.</p>
     """
 
