@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -25,27 +26,28 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r app/requirements.txt
           pip install pytest
 
-      - name: Run Tests
+      - name: Run Unit Tests
         run: |
           python -m pytest
 
   build:
     needs: test
-
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -58,16 +60,15 @@ jobs:
       - name: Tag Docker Image
         run: |
           docker tag automation-lab:latest \
-          407772390762.dkr.ecr.us-east-1.amazonaws.com/automation-lab:latest
+            407772390762.dkr.ecr.us-east-1.amazonaws.com/automation-lab:latest
 
       - name: Push Docker Image
         run: |
-          docker push \
-          407772390762.dkr.ecr.us-east-1.amazonaws.com/automation-lab:latest
+          docker push 407772390762.dkr.ecr.us-east-1.amazonaws.com/automation-lab:latest
 
-                - name: Force ECS Deployment
-                  run: |
-                    aws ecs update-service \
-                      --cluster automation-lab-cluster \
-                      --service automation-lab-service \
-                      --force-new-deployment
+      - name: Force ECS Deployment
+        run: |
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment
