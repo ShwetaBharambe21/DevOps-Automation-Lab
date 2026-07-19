@@ -1,9 +1,10 @@
-from flask import Flask, jsonify
-from prometheus_client import Counter, generate_latest  
+from flask import Flask, jsonify, Response
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
 
 app = Flask(__name__)
 
 REQUEST_COUNT = Counter("request_count", "Total Request Count")
+
 
 @app.route("/")
 def home():
@@ -14,15 +15,21 @@ def home():
     <p>Successfully running inside Docker.</p>
     """
 
+
 @app.route("/health")
 def health():
     return jsonify({
         "status": "healthy"
     }), 200
 
+
 @app.route("/metrics")
 def metrics():
-    return generate_latest(), 200
+    return Response(
+        generate_latest(),
+        mimetype=CONTENT_TYPE_LATEST
+    )
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5001)
