@@ -1,4 +1,3 @@
-# DevOps-Automation-Lab
 # 🚀 DevOps Automation Lab
 
 A complete end-to-end DevOps project demonstrating Infrastructure as Code (IaC), CI/CD, containerization, cloud deployment, monitoring, visualization, and alerting on AWS.
