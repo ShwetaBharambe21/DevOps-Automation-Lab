@@ -1,0 +1,52 @@
+groups:
+  - name: automation-lab
+
+    rules:
+
+      # Application is unreachable
+      - alert: ApplicationDown
+        expr: up == 0
+        for: 30s
+
+        labels:
+          severity: critical
+
+        annotations:
+          summary: "Application Down"
+          description: "Automation Lab application has been unreachable for more than 30 seconds."
+
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[2m]) > 0.80
+        for: 2m
+
+        labels:
+          severity: warning
+
+        annotations:
+          summary: "High CPU Usage"
+          description: "Application CPU usage has exceeded 80% for more than 2 minutes."
+
+      # High Memory Usage (example threshold: 500 MB)
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 524288000
+        for: 2m
+
+        labels:
+          severity: warning
+
+        annotations:
+          summary: "High Memory Usage"
+          description: "Application memory usage has exceeded 500 MB."
+
+      # No HTTP requests received
+      - alert: NoTraffic
+        expr: increase(request_count_total[5m]) == 0
+        for: 5m
+
+        labels:
+          severity: warning
+
+        annotations:
+          summary: "No Incoming Traffic"
+          description: "No requests have been received by the application in the last 5 minutes."
